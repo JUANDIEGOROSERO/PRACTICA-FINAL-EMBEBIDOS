@@ -143,29 +143,20 @@ void loop() {
   Serial.print("Voltaje: ");
   Serial.print(voltaje, 2);
   Serial.println(" V");
-
-  // // Maneja el cambio de pantalla
-  // if(mostrarPantalla2){
-  //   showBLL(conteoBloqueos, longitud, latitud);
-  //   if (millis() - tiempoInicioPantalla2 > 250) {
-  //     mostrarPantalla2 = false;   // Vuelve a pantalla 1 después de 250 ms
-  //   }
-  // }else{
-  //   showTHV(temp, hum, voltaje);  // Muestra pantalla 1
-  // }
-    if (mostrarPantalla3) {
+  
+  if (mostrarPantalla3) {
     showRST(conteoBloqueos);      // Pantalla 3
     if (millis() - tiempoInicioPantalla3 > duracionPantalla3) {
       mostrarPantalla3 = false;   // Volver a la pantalla principal después del tiempo
     }
-    }else if (mostrarPantalla2) {
+  }else if (mostrarPantalla2) {
     showBLL(conteoBloqueos, longitud, latitud); // Pantalla 2
     if (millis() - tiempoInicioPantalla2 > 250) {
       mostrarPantalla2 = false;   // Volver a la pantalla principal después del tiempo
     }
-    }else {
+  }else {
     showTHV(temp, hum, voltaje);  // Pantalla principal
-    }
+  }
 }
 
 // Función de interrupción para aumentar bloqueos
