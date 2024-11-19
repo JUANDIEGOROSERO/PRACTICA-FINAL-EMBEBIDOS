@@ -32,7 +32,6 @@ float voltaje = 0.0;
 volatile int conteoBloqueos = 0;          // Conteo de bloqueos detectados
 volatile bool reiniciarConteo = false;    // Indicador para reiniciar el conteo
 
-
 // Configuración del temporizador
 hw_timer_t * myTimer = NULL;
 volatile bool ledEstado = false;
@@ -42,6 +41,9 @@ volatile bool mostrarPantalla2 = false;
 unsigned long tiempoInicioPantalla2 = 0;        // Tiempo de inicio de la pantalla 2
 volatile unsigned long ultimaInterrupcion = 0;  // Tiempo de la última interrupción
 const unsigned long tiempoDebounce = 200;       // Tiempo mínimo entre detecciones en ms
+volatile bool mostrarPantalla3 = false;
+unsigned long tiempoInicioPantalla3 = 0;        // Tiempo de inicio de la pantalla 3
+const unsigned long duracionPantalla3 = 250;    // Duración de la pantalla 3 en ms    
 
 // Prototipos de funciones
 void IRAM_ATTR detectarBloqueo();  // Interrupción para el sensor infrarrojo
@@ -49,8 +51,8 @@ void IRAM_ATTR resetearConteo();   // Interrupción para el botón de reset
 void IRAM_ATTR gestionarLED();     // Interrupción para el Led
 
 void showTHV(float temp, float hum, float volt);            // Prototipo de la función mostrar temperatura, humedad y voltaje
-void showBLL(int conteoBloqueos, double lat, double log);  // Prototipo de mostrar bloqueos, latitud y longitud
-
+void showBLL(int conteoBloqueos, double lat, double log);   // Prototipo de la funcion mostrar bloqueos, latitud y longitud
+void showRST(int conteoBloqueos);                           // Prototipo de la funcion mostrar reinicio del contador     
 
 // Configuracion de pantalla
 SSD1306Wire oledDisplay(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);
@@ -142,16 +144,28 @@ void loop() {
   Serial.print(voltaje, 2);
   Serial.println(" V");
 
-  // Maneja el cambio de pantalla
-  if(mostrarPantalla2){
-    showBLL(conteoBloqueos, longitud, latitud);
-    if (millis() - tiempoInicioPantalla2 > 250) {
-      mostrarPantalla2 = false;   // Vuelve a pantalla 1 después de 250 ms
+  // // Maneja el cambio de pantalla
+  // if(mostrarPantalla2){
+  //   showBLL(conteoBloqueos, longitud, latitud);
+  //   if (millis() - tiempoInicioPantalla2 > 250) {
+  //     mostrarPantalla2 = false;   // Vuelve a pantalla 1 después de 250 ms
+  //   }
+  // }else{
+  //   showTHV(temp, hum, voltaje);  // Muestra pantalla 1
+  // }
+    if (mostrarPantalla3) {
+    showRST(conteoBloqueos);      // Pantalla 3
+    if (millis() - tiempoInicioPantalla3 > duracionPantalla3) {
+      mostrarPantalla3 = false;   // Volver a la pantalla principal después del tiempo
     }
-  }else{
-    showTHV(temp, hum, voltaje);  // Muestra pantalla 1
-  }
-
+    }else if (mostrarPantalla2) {
+    showBLL(conteoBloqueos, longitud, latitud); // Pantalla 2
+    if (millis() - tiempoInicioPantalla2 > 250) {
+      mostrarPantalla2 = false;   // Volver a la pantalla principal después del tiempo
+    }
+    }else {
+    showTHV(temp, hum, voltaje);  // Pantalla principal
+    }
 }
 
 // Función de interrupción para aumentar bloqueos
@@ -174,7 +188,9 @@ void IRAM_ATTR detectarBloqueo() {
 // Función de interrupción para reiniciar el conteo
 void IRAM_ATTR resetearConteo() {
 
-  reiniciarConteo = true;  // Bandera para el reinicio del contador
+  reiniciarConteo = true;           // Bandera para el reinicio del contador
+  mostrarPantalla3 = true;          // Activa la pantalla 3
+  tiempoInicioPantalla3 = millis(); //Registrar el tiempo de inicio de la interrupcion
 
 }
 
@@ -214,6 +230,17 @@ void showBLL(int conteoBloqueos, double lat, double log) {
   oledDisplay.drawString(0, 0, "Bloqueos detectados: " + String(conteoBloqueos) );
   oledDisplay.drawString(0, 10, "Longitud: " + String(log, 6));
   oledDisplay.drawString(0, 20, "Latencia: " + String(lat, 6)); 
+  oledDisplay.display();
+
+}
+
+// Función para mostrar la Pantalla 3
+void showRST(int conteoBloqueos) {
+
+  oledDisplay.clear();
+  oledDisplay.setTextAlignment(TEXT_ALIGN_LEFT);
+  oledDisplay.drawString(0, 0, "CONTADOR REINICIADO");
+  oledDisplay.drawString(0, 10, "Bloqueos detectados: " + String(conteoBloqueos) );
   oledDisplay.display();
 
 }
