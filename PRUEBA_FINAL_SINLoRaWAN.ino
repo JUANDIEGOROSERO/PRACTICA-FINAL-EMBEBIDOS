@@ -24,7 +24,7 @@ DHT dht(DHTPIN, DHTTYPE);      // Inicializa el sensor DHT11
 const int ledRojo = 45;        // Pin del LED rojo
 const int ledAzul = 46;        // Pin del LED azul
 
-const int pinPotenciometro = 5;       // Pin GPIO7 donde está conectado el potenciómetro
+const int pinPotenciometro = 5;       // Pin GPIO-5 donde está conectado el potenciómetro
 const float referenciaVoltaje = 3.3;  // Voltaje de referencia del ESP32 (3.3V)
 float voltaje = 0.0;
 
